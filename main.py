@@ -29,7 +29,7 @@ def config():
     """ Config section
 
     This function contains all possible configuration for all experiments. Full details on each configuration values
-    can be found in Infrastructure/enums.py.
+    can be found in :mod:`Infrastructure/enums`.
     """
 
     compared_algorithms_type: AlgorithmsType = AlgorithmsType.LassoRegression
