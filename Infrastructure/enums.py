@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """ All enums section
 
-This module contains all possible enums of this project. Most of them are used by the configuration section in main.py.
-See the following example on using an enum.
+This module contains all possible enums of this project. Most of them are used by the configuration section in
+:mod:`main`. See the following example on using an enum.
 
 Example
 -------
