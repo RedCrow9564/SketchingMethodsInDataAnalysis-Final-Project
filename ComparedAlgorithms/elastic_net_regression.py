@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-""" ElasticNet-Regression solvers module.
+"""
+elastic_net_regressions.py - ElasticNet-Regression solvers module
+=================================================================
 
-This module contains all available ElasticNet-Regression solvers. These solvers can be received by using the only public
-method 'get_method'.
+This module contains all available ElasticNet-Regression solvers.
+These solvers can be received by using the only public method :func:`get_method`.
 
 Example:
--------
     get_method(ElasticNetRegressionMethods.SkLearnLassoRegression) - Creating the Scikit-Learn solver
      for ElasticNet-Regression.
 
@@ -24,17 +25,15 @@ def _sklearn_elastic_net_regression(data_features: Matrix, output_samples: Colum
     """
     The standard solver of Scikit-Learn for Elastic-Net-Regression.
 
-    Attributes:
-    -----------
-        data_features(Matrix): The input data matrix nxd.
-        output_samples(ColumnVector): The output for the given inputs, nx1.
+    Args:
+        data_features(Matrix): The input data matrix ``nxd``.
+        output_samples(ColumnVector): The output for the given inputs, ``nx1``.
         n_alphas(int): The number of total regularization terms which will be tested by this solver.
         cross_validation_folds(int): The number of cross-validation folds used in this solver.
-        calc_residuals(bool): A flag for calculating the regression residuals. Defaults to True.
+        calc_residuals(bool): A flag for calculating the regression residuals. Defaults to ``True``.
 
     Returns:
-    --------
-        A column vector of the estimated coefficients and the 2-norm of the estimator's residuals.
+        A column vector of the estimated coefficients and the estimator's residuals.
 
     """
     model = ElasticNetCV(cv=cross_validation_folds, n_alphas=n_alphas, l1_ratio=elastic_net_factor,

@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
-""" Boosters for least-square solvers.
+"""
+method_boosters.py - Boosters for least-square solvers
+======================================================
 
 This module contains all available boosters for least-square methods, the Cholesky-booster and the Caratheodory-booster.
 See the following example of using any booster, i.e cholesky-booster.
 
 Example:
---------
     boosted_solver = cholesky_booster(existing_solver)
 
 """
 
 import numpy as np
-from numpy.linalg import cholesky, solve, lstsq
-from Infrastructure.utils import Callable, List, Scalar, ColumnVector, Vector, Matrix, ex, \
-    compute_parallel, compute_serial
+from numpy.linalg import cholesky
+from Infrastructure.utils import Callable, List, Scalar, ColumnVector, Vector, Matrix, ex, compute_serial
 
 
 _cholesky_covariance: Callable = lambda all_data_mat: cholesky(all_data_mat.T.dot(all_data_mat)).T
@@ -58,11 +58,21 @@ caratheodory_booster: Callable = __booster_template(_LMS_coreset, cross_validati
 
 
 def _caratheodory_set_python(points: Matrix, weights: ColumnVector) -> (Matrix, ColumnVector):
+    """
+    This method computes Caratheodory subset for the columns of a :math:`dxn` Matrix, with given weights.
+
+    Args:
+        points(Matrix): A :math:`dxn` Matrix.
+        weights(ColumnVector): A weights for the columns of :math:`A`.
+
+    Returns:
+        A Caratheodory subset of :math:`d^{2]+1` columns of :math:`A, as a :math:`dx(d^{2}+1)` Matrix,
+        and their weights as a ColumnVector.
+    """
     dim: int = len(points)  # The dimension of all rows, or rows of the matrix, d.
 
     while len(weights) > dim + 1:
         diff_points: Matrix = (points[:, 1:].T - points[:, 0].T).T
-        #v: ColumnVector = lstsq(diff_points, np.zeros((dim,)))
         _, _, V = np.linalg.svd(diff_points, full_matrices=True)
         v = V[-1]
         v = np.insert(v, [0], -np.sum(v))  # The last num_points - dim - 2 zeroes are removed.
@@ -76,7 +86,7 @@ def _caratheodory_set_python(points: Matrix, weights: ColumnVector) -> (Matrix, 
     return points, weights
 
 
-def greedy_split(arr: Vector, n: int, axis: int = 0, default_block_size: int = 1) -> List[Vector]:
+def _greedy_split(arr: Vector, n: int, axis: int = 0, default_block_size: int = 1) -> List[Vector]:
     """Greedily splits an array into n blocks.
 
     Splits array arr along axis into n blocks such that:
@@ -102,15 +112,28 @@ def greedy_split(arr: Vector, n: int, axis: int = 0, default_block_size: int = 1
 
 def fast_caratheodory_set_python(points: Matrix, weights: ColumnVector,
                                  accuracy_time_tradeoff_const: int) -> (Matrix, ColumnVector):
-    points_num: int = points.shape[1]  # The number of points, or columns of the matrix, n.
-    dim: int = len(points)  # The dimension of all rows, or rows of the matrix, d.
+    """
+    This method computes Caratheodory subset for the columns of a :math:`dxn` Matrix, with given weights, using the
+    fast Cartheodory subset algorithm with a given number of clusters.
+
+    Args:
+        points(Matrix): A :math:`dxn` Matrix.
+        weights(ColumnVector): A weights for the columns of :math:`A`.
+        accuracy_time_tradeoff_const(int): The number of clusters to use for computing the Caratheodory subset.
+
+    Returns:
+        A Caratheodory subset of :math:`d^{2]+1` columns of :math:`A, as a :math:`dx(d^{2}+1)` Matrix,
+        and their weights as a ColumnVector.
+    """
+    points_num: int = points.shape[1]  # The number of points, or columns of the matrix, :math:`n`.
+    dim: int = len(points)  # The dimension of all rows, or rows of the matrix, :math:`d`.
 
     if points_num <= dim + 1:
         return points, weights
 
-    # Split points into k clusters and find the weighted means of every cluster.
-    clusters = greedy_split(points, accuracy_time_tradeoff_const, axis=1, default_block_size=dim + 2)
-    split_weights = greedy_split(weights, accuracy_time_tradeoff_const, default_block_size=dim + 2)
+    # Split points into :math:`k` clusters and find the weighted means of every cluster.
+    clusters = _greedy_split(points, accuracy_time_tradeoff_const, axis=1, default_block_size=dim + 2)
+    split_weights = _greedy_split(weights, accuracy_time_tradeoff_const, default_block_size=dim + 2)
     arguments_to_parallel_mean = [
         (cluster, 1, cluster_weights, True) for cluster, cluster_weights in zip(clusters, split_weights)]
     means_and_clusters_weights = compute_serial(np.average, arguments_to_parallel_mean)
@@ -140,13 +163,22 @@ def fast_caratheodory_set_python(points: Matrix, weights: ColumnVector,
 
 
 def create_coreset_fast_caratheodory(A: Matrix, clusters_count:int) -> Matrix:
+    """
+    This method computes the outer-products of the rows of the input matrix. Then it computes a coreset for it,
+    using :func:`fast_caratheodory_set_python` with ``clusters_count`` clusters.
+
+    Args:
+        A(Matrix): An input :math:nxd matrix.
+        clusters_count(int): The number of clusters to use for computing the coreset.
+
+    Returns:
+        A :math:`(d^{2}+1)xn` Matrix coreset for the input matrix.
+    """
     n: int = A.shape[0]  # The number of points, or rows of the matrix, n.
     d: int = A.shape[1]  # The dimension of all rows, or columns of the matrix, d.
 
     rows_outer_products: Matrix = np.einsum("ij,ik->ijk", A, A, optimize=True)
     rows_outer_products = rows_outer_products.reshape((n, -1)).T
-    subrows, weights = fast_caratheodory_set_python(
-        rows_outer_products, np.ones(n) / n, clusters_count)
-    reduced_mat: Matrix = np.sqrt(np.multiply(subrows[0:d ** 2:d + 1, :],
-                                              n * weights)).T
+    subrows, weights = fast_caratheodory_set_python(rows_outer_products, np.ones(n) / n, clusters_count)
+    reduced_mat: Matrix = np.sqrt(np.multiply(subrows[0:d ** 2:d + 1, :], n * weights)).T
     return reduced_mat

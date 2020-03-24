@@ -5,7 +5,7 @@ from Infrastructure.enums import ExperimentType, LogFields
 
 @ex.capture(prefix="run_time_experiments_config")
 def _run_time_experiment(compared_solvers: List, data_matrix: Matrix, output_samples: Vector,
-                         run_time_compared_data_sizes: List):
+                         results_path: str, run_time_compared_data_sizes: List):
     for solver in compared_solvers:
         data_log = DataLog([LogFields.DataSize, LogFields.Coefficients, LogFields.Residuals,
                             LogFields.DurationInSeconds, LogFields.AtTimesErrors])
@@ -30,12 +30,12 @@ def _run_time_experiment(compared_solvers: List, data_matrix: Matrix, output_sam
         data_log.append(LogFields.AtTimesErrors, transpose_errors_list)
         data_log.append(LogFields.Coefficients, coefficients_list)
         data_log.append(LogFields.DurationInSeconds, durations_list)
-        data_log.save_log(solver.__name__ + ".csv")
+        data_log.save_log(solver.__name__ + ".csv", results_path)
 
 
 @ex.capture(prefix="number_of_alphas_experiments_config")
-def _number_of_alphas_experiment(compared_solvers: List, data_matrix: Matrix,
-                                 output_samples: Vector, alphas_range: List):
+def _number_of_alphas_experiment(compared_solvers: List, data_matrix: Matrix, output_samples: Vector,
+                                 results_path: str, alphas_range: List):
     for solver in compared_solvers:
         data_log = DataLog([LogFields.Coefficients, LogFields.Residuals, LogFields.DurationInSeconds,
                             LogFields.AlphasCount])
@@ -57,7 +57,7 @@ def _number_of_alphas_experiment(compared_solvers: List, data_matrix: Matrix,
         data_log.append(LogFields.Residuals, residuals_list)
         data_log.append(LogFields.Coefficients, coefficients_list)
         data_log.append(LogFields.DurationInSeconds, durations_list)
-        data_log.save_log(solver.__name__ + ".csv")
+        data_log.save_log(solver.__name__ + ".csv", results_path)
 
 
 _experiment_type_to_method: Dict = {

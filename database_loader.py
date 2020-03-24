@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
-""" The data management module
+"""
+database_loader.py - The data management module
+===============================================
 
 This module handles the fetching of the data from the local resources path, given in the configuration and arranging it
 for our purposes of estimations. See the example for fetching the 3D Road Network database.
 
 Example:
--------
     get_data(DatabaseType.ThreeDRoadNetwork) - Creating the standard Numpy solver for Linear-Regression.
 
 """
 
-from numpy.random import rand
+from numpy.random import randn
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import scale
@@ -22,19 +23,18 @@ from Infrastructure.utils import ex, Dict, ColumnVector, Matrix, create_factory,
 @ex.capture(prefix="synthetic_data_config")
 def _get_synthetic_data(data_size: int, features_num: int) -> (Matrix, ColumnVector):
     """
-    A method which creates a random matrix of size data_size x features_num and a random 1 x data_size vector.
+    A method which creates a random matrix of ``size data_size x features_num`` and a ``random 1 x data_size``
+    random vector.
 
-    Attributes:
-    -----------
-        data_size(int): The input data matrix nxd.
-        features_num(int): The output for the given inputs, nx1.
+    Args:
+        data_size(int): The number of samples in the data - ``n``.
+        features_num(int): The number of columns in the data - ``d``.
 
     Returns:
-    --------
-        A random size data_size x features_num Matrix and a random 1 x data_size ColumnVector.
+        A random ``size data_size x features_num`` Matrix and a random ``1 x data_size`` ColumnVector.
 
     """
-    return rand(data_size, features_num), rand(data_size)
+    return randn(data_size, features_num), randn(data_size)
 
 
 @ex.capture
@@ -43,18 +43,16 @@ def _get_3d_road_network_data(resources_path: str) -> (Matrix, ColumnVector):
     A method which loads the 3D Road Network database from the given local path.
     See https://archive.ics.uci.edu/ml/datasets/3D+Road+Network+(North+Jutland,+Denmark)
 
-    Attributes:
-    -----------
+    Args:
         resources_path(str): The path in which this database is stored in.
 
     Returns:
-    --------
         A Matrix of the features, besides the height, and a ColumnVector of the height feature.
 
     """
     data: Matrix = scale(np.loadtxt(os.path.join(resources_path, "3D_spatial_network.txt"), delimiter=','))
-    output_samples: ColumnVector = data[:, -1]
-    data_matrix: Matrix = data[:, 1:3]
+    output_samples: ColumnVector = scale(data[:, -1])
+    data_matrix: Matrix = scale(data[:, 1:3])
     return data_matrix, output_samples
 
 
@@ -64,12 +62,10 @@ def _get_house_sales_in_king_county_data(resources_path: str) -> (Matrix, Column
     A method which loads the House sales in King County database from the given local path.
     See https://www.kaggle.com/harlfoxem/housesalesprediction
 
-    Attributes:
-    -----------
+    Args:
         resources_path(str): The path in which this database is stored in.
 
     Returns:
-    --------
         A Matrix of the features, besides the price, and a ColumnVector of the price feature.
 
     """
@@ -85,12 +81,10 @@ def _get_household_electric_power_consumption_data(resources_path: str) -> (Matr
     A method which loads the Household electric power consumption database from the given local path.
     See https://archive.ics.uci.edu/ml/datasets/Individual+household+electric+power+consumption.
 
-    Attributes:
-    -----------
+    Args:
         resources_path(str): The path in which this database is stored in.
 
     Returns:
-    --------
         A Matrix of the features, besides the voltage, and a ColumnVector of the voltage feature.
 
     """

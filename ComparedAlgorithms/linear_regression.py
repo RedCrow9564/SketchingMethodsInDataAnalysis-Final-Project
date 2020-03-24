@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-""" Linear-Regression solvers module.
+"""
+linear_regression.py - Linear-Regression solvers module
+=======================================================
 
-This module contains all available Linear-Regression solvers. These solvers can be received by using the only public
-method 'get_method'.
+This module contains all available Linear-Regression solvers.
+These solvers can be received by using the only public method :func:`get_method`.
 
 Example:
--------
     get_method(LinearRegressionMethods.SVDBased) - Creating the standard Numpy solver for Linear-Regression.
 
 """
@@ -20,18 +21,16 @@ from ComparedAlgorithms.method_boosters import cholesky_booster, caratheodory_bo
 
 
 def _svd_based_linear_regression(data_features: Matrix, output_samples: ColumnVector,
-                                 calc_residuals: bool = True) -> (ColumnVector, ColumnVector):
+                                 calc_residuals: bool = True, **kwargs) -> (ColumnVector, ColumnVector):
     """
     The standard solver of Numpy for Linear-Regression, based on SVD decomposition.
 
-    Attributes:
-    -----------
-        data_features(Matrix): The input data matrix nxd.
-        output_samples(ColumnVector): The output for the given inputs, nx1.
-        calc_residuals(bool): A flag for calculating the regression residuals. Defaults to True.
+    Args:
+        data_features(Matrix): The input data matrix ``nxd``.
+        output_samples(ColumnVector): The output for the given inputs, ``nx1``.
+        calc_residuals(bool): A flag for calculating the regression residuals. Defaults to ``True``.
 
     Returns:
-    --------
         Two column vectors of the estimated coefficients and the estimator's residuals.
 
     """
@@ -41,18 +40,16 @@ def _svd_based_linear_regression(data_features: Matrix, output_samples: ColumnVe
 
 
 def _qr_based_linear_regression(data_features: Matrix, output_samples: ColumnVector,
-                                calc_residuals: bool = True) -> (ColumnVector, ColumnVector):
+                                calc_residuals: bool = True, **kwargs) -> (ColumnVector, ColumnVector):
     """
     A solver for Linear-Regression, based on QR-decomposition.
 
-    Attributes:
-    -----------
-        data_features(Matrix): The input data matrix nxd.
-        output_samples(ColumnVector): The output for the given inputs, nx1.
-        calc_residuals(bool): A flag for calculating the regression residuals. Defaults to True.
+    Args:
+        data_features(Matrix): The input data matrix ``nxd``.
+        output_samples(ColumnVector): The output for the given inputs, ``nx1``.
+        calc_residuals(bool): A flag for calculating the regression residuals. Defaults to ``True``.
 
     Returns:
-    --------
         Two column vectors of the estimated coefficients and the estimator's residuals.
 
     """
@@ -63,18 +60,16 @@ def _qr_based_linear_regression(data_features: Matrix, output_samples: ColumnVec
 
 
 def _normal_equations_based_linear_regression(data_features: Matrix, output_samples: ColumnVector,
-                                              calc_residuals: bool = True) -> (ColumnVector, ColumnVector):
+                                              calc_residuals: bool = True, **kwargs) -> (ColumnVector, ColumnVector):
     """
-    A solver for Linear-Regression, based on QR-decomposition.
+    A solver for Linear-Regression, based on solving the Normal-Equations.
 
-    Attributes:
-    -----------
-        data_features(Matrix): The input data matrix nxd.
-        output_samples(ColumnVector): The output for the given inputs, nx1.
-        calc_residuals(bool): A flag for calculating the regression residuals. Defaults to True.
+    Args:
+        data_features(Matrix): The input data matrix ``nxd``.
+        output_samples(ColumnVector): The output for the given inputs, ``nx1``.
+        calc_residuals(bool): A flag for calculating the regression residuals. Defaults to ``True``.
 
     Returns:
-    --------
         Two column vectors of the estimated coefficients and the estimator's residuals.
 
     """
@@ -85,8 +80,21 @@ def _normal_equations_based_linear_regression(data_features: Matrix, output_samp
 
 
 @ex.capture
-def _sketch_inverse_linear_regression(data_features: Matrix, output_samples: ColumnVector,
-                                      clusters_count: int, calc_residuals: bool = True) -> (ColumnVector, ColumnVector):
+def _sketch_inverse_linear_regression(data_features: Matrix, output_samples: ColumnVector, clusters_count: int,
+                                      calc_residuals: bool = True, **kwargs) -> (ColumnVector, ColumnVector):
+    """
+    A solver for Linear-Regression, based on boosting the algorithm which solves the Normal-Equations,
+    using fast Caratheodory method.
+
+    Args:
+        data_features(Matrix): The input data matrix ``nxd``.
+        output_samples(ColumnVector): The output for the given inputs, ``nx1``.
+        calc_residuals(bool): A flag for calculating the regression residuals. Defaults to ``True``.
+
+    Returns:
+        Two column vectors of the estimated coefficients and the estimator's residuals.
+
+    """
     coreset: Matrix = create_coreset_fast_caratheodory(data_features, clusters_count)
     outputs_sum: Scalar = np.sum(output_samples)
     points, weights = fast_caratheodory_set_python(data_features.T, output_samples / outputs_sum, clusters_count)
@@ -100,8 +108,7 @@ _sketch_cholesky_linear_regression: Callable = cholesky_booster(_svd_based_linea
 _caratheodory_booster_linear_regression: Callable = caratheodory_booster(_svd_based_linear_regression,
                                                                          perform_normalization=False)
 
-# TODO: Append more solvers when they are implemented and tested.
-# A private dictionary used for creating the solvers factory 'get_method'.
+# A private dictionary used for creating the solvers factory :func:`get_method`.
 _linear_regressions_methods: Dict[str, Callable] = {
     LinearRegressionMethods.SVDBased: _svd_based_linear_regression,
     LinearRegressionMethods.QRBased: _qr_based_linear_regression,
@@ -111,5 +118,5 @@ _linear_regressions_methods: Dict[str, Callable] = {
     LinearRegressionMethods.SketchAndInverse: _sketch_inverse_linear_regression
 }
 
-# A factory which creates the relevant linear-regression solver.
+# A factory which creates the requested linear-regression solvers.
 get_method: Callable = create_factory(_linear_regressions_methods, are_methods=True)
