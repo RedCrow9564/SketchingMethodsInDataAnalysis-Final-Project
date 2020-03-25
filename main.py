@@ -41,8 +41,8 @@ def config():
     can be found in :mod:`enums.py`.
     """
 
-    compared_algorithms_type: AlgorithmsType = AlgorithmsType.LinearRegression
-    compared_methods: List = [LinearRegressionMethods.SketchAndInverse]  # Leave empty for using all solvers.
+    compared_algorithms_type: AlgorithmsType = AlgorithmsType.LassoRegression
+    compared_methods: List = [LassoRegressionMethods.SkLearnLassoRegression]  # Leave empty for using all solvers.
     numpy_distribution: NumpyDistribution = NumpyDistribution.IntelDistribution
     used_database: DatabaseType = DatabaseType.Synthetic
     experiment_type: ExperimentType = ExperimentType.RunTimeExperiment
