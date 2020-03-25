@@ -73,10 +73,7 @@ class LinearRegressionMethods(BaseEnum):
     NormalEquationsBased: str = "Based on Normal-Equations"  # Solver based on solving the Normal-Equations.
     SketchAndCholesky: str = "Sketch + Cholesky"
     SketchAndInverse: str = "Sketch + Inverse"
-    #LGMRES: str = "LGMRES"  # Scipy's function supports preconditioning.
-    #QMR: str = "QMR"  # Scipy's function supports preconditioning.
-    #LSQR: str = "LSQR"  # Scipy's function DOESN'T support preconditioning!!!
-    #LSMR: str = "LSMR"  # Scipy's function DOESN'T support preconditioning!!!
+    SketchPreconditioned: str = "Sketch Preconsitioning for LSQR"
 
 
 class LassoRegressionMethods(BaseEnum):

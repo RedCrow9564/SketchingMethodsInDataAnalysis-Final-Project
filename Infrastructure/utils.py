@@ -13,9 +13,12 @@ import inspect
 import time
 import pandas as pd
 import os
+import numpy as np
 from multiprocessing import Pool
 from sacred import Experiment
+import pyximport
 
+pyximport.install(setup_args={"include_dirs": np.get_include()}, reload_support=True)
 # Defining the "sacred" experiment object.
 ex = Experiment(name="Initializing project", interactive=False)
 
@@ -176,8 +179,8 @@ def measure_time(method: Callable) -> Callable:
         ts = time.perf_counter_ns()
         result = method(*args, **kw)
         te = time.perf_counter_ns()
-        duration_in_ms: float = (te - ts) * 1e-9
-        return result + (duration_in_ms,)
+        duration_in_seconds: float = (te - ts) * 1e-9
+        return result + (duration_in_seconds,)
     timed.__name__ = method.__name__ + " with time measure"
     return timed
 

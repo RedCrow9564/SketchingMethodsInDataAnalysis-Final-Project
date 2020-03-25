@@ -30,7 +30,7 @@ def _run_time_experiment(compared_solvers: List, data_matrix: Matrix, output_sam
         data_log.append(LogFields.AtTimesErrors, transpose_errors_list)
         data_log.append(LogFields.Coefficients, coefficients_list)
         data_log.append(LogFields.DurationInSeconds, durations_list)
-        data_log.save_log(solver.__name__ + ".csv", results_path)
+        data_log.save_log(solver.__name__, results_path)
 
 
 @ex.capture(prefix="number_of_alphas_experiments_config")
@@ -57,7 +57,7 @@ def _number_of_alphas_experiment(compared_solvers: List, data_matrix: Matrix, ou
         data_log.append(LogFields.Residuals, residuals_list)
         data_log.append(LogFields.Coefficients, coefficients_list)
         data_log.append(LogFields.DurationInSeconds, durations_list)
-        data_log.save_log(solver.__name__ + ".csv", results_path)
+        data_log.save_log(solver.__name__, results_path)
 
 
 _experiment_type_to_method: Dict = {

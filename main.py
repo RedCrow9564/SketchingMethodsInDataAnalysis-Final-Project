@@ -41,11 +41,11 @@ def config():
     can be found in :mod:`enums.py`.
     """
 
-    compared_algorithms_type: AlgorithmsType = AlgorithmsType.LassoRegression
-    compared_methods: List = []  # Leave empty for using all solvers.
+    compared_algorithms_type: AlgorithmsType = AlgorithmsType.LinearRegression
+    compared_methods: List = [LinearRegressionMethods.SketchAndInverse]  # Leave empty for using all solvers.
     numpy_distribution: NumpyDistribution = NumpyDistribution.IntelDistribution
     used_database: DatabaseType = DatabaseType.Synthetic
-    experiment_type: ExperimentType = ExperimentType.NumberOfAlphasExperiment
+    experiment_type: ExperimentType = ExperimentType.RunTimeExperiment
     cross_validation_folds: int = 3
     n_alphas: int = 100
 
@@ -58,7 +58,11 @@ def config():
 
     synthetic_data_config: Dict[str, int] = {
         "data_size": 2400000,
-        "features_num": 7
+        "features_num": 3
+    }
+    sketch_preconditioned_config: Dict[str, float] = {
+        "sampled_rows": 0.005,
+        "switch_sign_probability": 0.5
     }
     resources_path: str = r'Resources'
     results_path: str = r'Results'
