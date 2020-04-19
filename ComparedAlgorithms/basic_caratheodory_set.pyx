@@ -1,5 +1,4 @@
-# distutils: extra_compile_args = /fopenmp
-# distutils: extra_link_args = /fopenmp
+
 # cython: language_level=3, boundscheck=False, wraparound=False
 # cython: initializedcheck=False, cdivision=True, nonecheck=False
 cimport openmp
