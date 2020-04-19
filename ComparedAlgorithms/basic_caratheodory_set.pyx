@@ -1,7 +1,6 @@
 
 # cython: language_level=3, boundscheck=False, wraparound=False
 # cython: initializedcheck=False, cdivision=True, nonecheck=False
-cimport openmp
 import numpy as np
 cimport numpy as np
 from cython.parallel cimport prange
