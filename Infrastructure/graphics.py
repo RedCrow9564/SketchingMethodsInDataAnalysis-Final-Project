@@ -31,20 +31,31 @@ class GraphManager:
         plt.subplot(self._rows, self._cols, self._current_graph)
 
         for one_legend, experiment_data in zip(legends, data_values):
-            if "BOOST" in one_legend:
-                if "d=3" in one_legend:
+            if "Boost" in one_legend:
+                if "d=3" in one_legend or "A=50" in one_legend or "ElasticNet" in one_legend:
                     plt.plot(x_values[::2], experiment_data[::2], marker=marker, linestyle=":", color="b")
-                elif "d=5" in one_legend:
+                elif "d=5" in one_legend or "A=100" in one_legend or "Lasso" in one_legend:
                     plt.plot(x_values[::2], experiment_data[::2], marker=marker, linestyle=":", color="g")
-                elif "d=7" in one_legend:
-                    plt.plot(x_values[::2], experiment_data[::2], marker=marker, linestyle=":", color="r")
+                elif "d=7" in one_legend or "A=200" in one_legend or "Ridge" in one_legend:
+                    if "Xeon" in one_legend:
+                        plt.plot(x_values[::2], experiment_data[::2], marker=marker, linestyle=":", color="y")
+                    else:
+                        plt.plot(x_values[::2], experiment_data[::2], marker=marker, linestyle=":", color="r")
+                elif "A=300" in one_legend:
+                    plt.plot(x_values[::2], experiment_data[::2], marker=marker, linestyle=":", color="m")
             else:
-                if "d=3" in one_legend:
+                if "d=3" in one_legend or "A=50" in one_legend or "ElasticNet" in one_legend:
                     plt.plot(x_values[::2], experiment_data[::2], marker=marker, linestyle="-", color="b")
-                elif "d=5" in one_legend:
+                elif "d=5" in one_legend or "A=100" in one_legend or "Lasso" in one_legend:
                     plt.plot(x_values[::2], experiment_data[::2], marker=marker, linestyle="-", color="g")
-                elif "d=7" in one_legend:
-                    plt.plot(x_values[::2], experiment_data[::2], marker=marker, linestyle="-", color="r")
+                elif "d=7" in one_legend or "A=200" in one_legend or "Ridge" in one_legend:
+                    if "Xeon" in one_legend:
+                        plt.plot(x_values[::2], experiment_data[::2], marker=marker, linestyle="-", color="y")
+                    else:
+                        plt.plot(x_values[::2], experiment_data[::2], marker=marker, linestyle="-", color="r")
+                elif "A=300" in one_legend:
+                    plt.plot(x_values[::2], experiment_data[::2], marker=marker, linestyle="-", color="m")
+
 
         plt.legend(legends, fontsize=6, loc="upper left")
         plt.xlabel("\\textit{" + x_label + "}", fontsize=12)
@@ -56,8 +67,8 @@ class GraphManager:
         self._current_graph += 1
 
     def add_run_time_plot(self, data_size_values: Vector, data_values: Matrix, plot_title, legends: List[str],
-                          linestyle):
-        self.add_plot(data_size_values, "Data size n", data_values, "Computation time [seconds]", plot_title, legends,
+                          linestyle, x_label):
+        self.add_plot(data_size_values, x_label, data_values, "Computation time [seconds]", plot_title, legends,
                       6, linestyle)
 
     def add_accuracy_histogram(self):
@@ -86,22 +97,22 @@ def config():
     compared_algorithms_type: AlgorithmsType = AlgorithmsType.LinearRegression
     numpy_distribution: NumpyDistribution = NumpyDistribution.CPythonDistribution
     used_database: DatabaseType = DatabaseType.Synthetic
-    experiment_type: ExperimentType = ExperimentType.RunTimeExperiment
+    experiment_type: ExperimentType = ExperimentType.NumberOfAlphasExperiment
     cross_validation_folds: int = 3
     n_alphas: int = 100
 
     run_time_experiments_config: Dict[str, range] = {
-        "run_time_compared_data_sizes": range(100000, 2400000, 100000)
+        "run_time_compared_data_sizes": range(100000, 2700000, 100000)
     }
     synthetic_data_config: Dict[str, int] = {
         "data_size": 230,
         "features_num": 10
     }
     number_of_alphas_experiments_config: Dict[str, range] = {
-        "alphas_range": range(1, 201, 20)
+        "alphas_range": range(1, 221, 20)
     }
     results_path: str = os.path.join(
-        r'..', 'Results', 'Run-Time comparison', 'different dimensions d')
+        r'..', 'Results', 'Number of Alphas')
 
     clusters_count: int = 2
     elastic_net_factor: float = 0.5  # Rho factor in Elastic-Net regularization.
@@ -135,7 +146,7 @@ def plot_results(results_path, experiment_type, run_time_experiments_config, num
             run_times, legends = _load_all_csv(os.path.join(results_path, sub_folder), LogFields.DurationInSeconds)
             compared_data_sizes: Vector = list(run_time_experiments_config["run_time_compared_data_sizes"])
             if not is_empty(legends):
-                g.add_run_time_plot(compared_data_sizes, run_times, sub_folder, legends, "-")
+                g.add_run_time_plot(compared_data_sizes, run_times, sub_folder, legends, "-", "Data size n")
 
     elif experiment_type == ExperimentType.AccuracyExperiment:
         g = GraphManager(f'Accuracy comparison of solvers over synthetic data, {numpy_distribution}', folders_count)
@@ -153,6 +164,7 @@ def plot_results(results_path, experiment_type, run_time_experiments_config, num
             run_times, legends = _load_all_csv(os.path.join(results_path, sub_folder), LogFields.DurationInSeconds)
             compared_data_sizes: Vector = list(number_of_alphas_experiments_config["alphas_range"])
             if not is_empty(legends):
-                g.add_run_time_plot(compared_data_sizes, run_times, sub_folder, legends, "-")
+                g.add_run_time_plot(compared_data_sizes, run_times, sub_folder, legends, "-",
+                                    r"Number of alphas $\left| A \right|$")
 
     g.show()

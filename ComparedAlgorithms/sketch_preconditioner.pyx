@@ -3,7 +3,7 @@
 import numpy as np
 cimport numpy as np
 from libc.stdlib cimport rand, RAND_MAX, srand, malloc, free, abort
-from cython.parallel import prange
+from cython.parallel cimport prange
 from scipy.fft import dct
 from Infrastructure.utils import RowVector, Matrix
 
@@ -45,4 +45,5 @@ def generate_sketch_preconditioner(const double[:, ::1] data_matrix, const unsig
     _random_sign_change(data_matrix, sketched_mat, switch_sign_probability)
     sketched_mat = dct(sketched_mat, norm='ortho')
     #return _pick_random_rows(sketched_mat, sampled_rows)  # TODO: Check run time in Google Colab.
-    return sketched_mat.base[np.random.randint(low=0, high=sketched_mat.shape[0], size=sampled_rows), :]
+    sketched_mat = np.array(sketched_mat)[np.random.randint(low=0, high=sketched_mat.shape[0], size=sampled_rows), :]
+    return sketched_mat

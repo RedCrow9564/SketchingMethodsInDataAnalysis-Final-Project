@@ -7,6 +7,7 @@ This module contains all available Linear-Regression solvers.
 These solvers can be received by using the only public method :func:`get_method`.
 
 Example:
+::
     get_method(LinearRegressionMethods.SVDBased) - Creating the standard Numpy solver for Linear-Regression.
 
 """
@@ -20,135 +21,170 @@ from Infrastructure.utils import ex, create_factory, Dict, Scalar, ColumnVector,
 from ComparedAlgorithms.method_boosters import cholesky_booster, caratheodory_booster, \
     create_coreset_fast_caratheodory, fast_caratheodory_set_python
 from ComparedAlgorithms.sketch_preconditioner import generate_sketch_preconditioner
+from ComparedAlgorithms.base_least_square_solver import BaseSolver
 
 
-def _svd_based_linear_regression(data_features: Matrix, output_samples: ColumnVector,
-                                 calc_residuals: bool = True, **kwargs) -> (ColumnVector, ColumnVector):
-    """
-    The standard solver of Numpy for Linear-Regression, based on SVD decomposition.
+class _SVDSolver(BaseSolver):
+    @ex.capture
+    def __init__(self, data_features: Matrix, output_samples: ColumnVector, cross_validation_folds: int,
+                 n_alphas: int = -1):
+        r"""
+        The standard solver of Numpy for Linear-Regression.
 
-    Args:
-        data_features(Matrix): The input data matrix ``nxd``.
-        output_samples(ColumnVector): The output for the given inputs, ``nx1``.
-        calc_residuals(bool): A flag for calculating the regression residuals. Defaults to ``True``.
+        Args:
+            data_features(Matrix): The input data matrix :math:`n \times d`.
+            output_samples(ColumnVector): The output for the given inputs, :math:`n \times 1`.
+            n_alphas(int): The number of total regularization terms which will be tested by this solver.
+            cross_validation_folds(int): The number of cross-validation folds used in this solver.
 
-    Returns:
-        Two column vectors of the estimated coefficients and the estimator's residuals.
+        """
+        super(_SVDSolver, self).__init__(data_features, output_samples, n_alphas, cross_validation_folds)
+        self._model = None
 
-    """
-    coefficients: ColumnVector = lstsq(data_features, output_samples, rcond=-1)[0]
-    residuals: ColumnVector = output_samples - data_features.dot(coefficients) if calc_residuals else -1
-    return coefficients, residuals
-
-
-def _qr_based_linear_regression(data_features: Matrix, output_samples: ColumnVector,
-                                calc_residuals: bool = True, **kwargs) -> (ColumnVector, ColumnVector):
-    """
-    A solver for Linear-Regression, based on QR-decomposition.
-
-    Args:
-        data_features(Matrix): The input data matrix ``nxd``.
-        output_samples(ColumnVector): The output for the given inputs, ``nx1``.
-        calc_residuals(bool): A flag for calculating the regression residuals. Defaults to ``True``.
-
-    Returns:
-        Two column vectors of the estimated coefficients and the estimator's residuals.
-
-    """
-    q, r = qr(data_features)
-    coefficients: ColumnVector = solve_triangular(r, q.T.dot(output_samples), lower=False, check_finite=False)
-    residuals: ColumnVector = output_samples - data_features.dot(coefficients) if calc_residuals else -1
-    return coefficients, residuals
+    def fit(self) -> ColumnVector:
+        """
+        The method which fits the requested model to the given data.
+        """
+        self._fitted_coefficients = lstsq(self._data_features, self._output_samples, rcond=-1)[0]
+        return self._fitted_coefficients
 
 
-def _normal_equations_based_linear_regression(data_features: Matrix, output_samples: ColumnVector,
-                                              calc_residuals: bool = True, **kwargs) -> (ColumnVector, ColumnVector):
-    """
-    A solver for Linear-Regression, based on solving the Normal-Equations.
+class _QRSolver(BaseSolver):
+    @ex.capture
+    def __init__(self, data_features: Matrix, output_samples: ColumnVector, cross_validation_folds: int,
+                 n_alphas: int = -1):
+        r"""
+        A solver for Linear-Regression, based on QR-decomposition.
 
-    Args:
-        data_features(Matrix): The input data matrix ``nxd``.
-        output_samples(ColumnVector): The output for the given inputs, ``nx1``.
-        calc_residuals(bool): A flag for calculating the regression residuals. Defaults to ``True``.
+        Args:
+            data_features(Matrix): The input data matrix :math:`n \times d`.
+            output_samples(ColumnVector): The output for the given inputs, :math:`n \times 1`.
+            n_alphas(int): The number of total regularization terms which will be tested by this solver.
+            cross_validation_folds(int): The number of cross-validation folds used in this solver.
 
-    Returns:
-        Two column vectors of the estimated coefficients and the estimator's residuals.
+        """
+        super(_QRSolver, self).__init__(data_features, output_samples, n_alphas, cross_validation_folds)
+        self._model = None
 
-    """
-
-    coefficients: ColumnVector = pinv(data_features).dot(output_samples)
-    residuals: ColumnVector = output_samples - data_features.dot(coefficients) if calc_residuals else -1
-    return coefficients, residuals
-
-
-@ex.capture(prefix="sketch_preconditioned_config")
-def _sketch_preconditioned_based_linear_regression(
-        data_features: Matrix, output_samples: ColumnVector, sampled_rows: float, switch_sign_probability: float,
-        _seed, calc_residuals: bool = True, **kwargs) -> (ColumnVector, ColumnVector):
-    """
-    A solver for Linear-Regression, based on the iterative method LSQR and preconditioning.
-
-    Args:
-        data_features(Matrix): The input data matrix ``nxd``.
-        output_samples(ColumnVector): The output for the given inputs, ``nx1``.
-        calc_residuals(bool): A flag for calculating the regression residuals. Defaults to ``True``.
-
-    Returns:
-        Two column vectors of the estimated coefficients and the estimator's residuals.
-
-    """
-
-    _, R = qr(generate_sketch_preconditioner(data_features, int(sampled_rows * len(data_features)),
-                                             np.empty_like(data_features), _seed, switch_sign_probability))
-    partial_solution: ColumnVector = lsqr(data_features.dot(inv(R)), output_samples, atol=1e-15, btol=1e-15)[0]
-    coefficients: ColumnVector = solve_triangular(R, partial_solution, lower=False, check_finite=False)
-    residuals: ColumnVector = output_samples - data_features.dot(coefficients) if calc_residuals else -1
-    return coefficients, residuals
+    def fit(self) -> ColumnVector:
+        """
+        The method which fits the requested model to the given data.
+        """
+        q, r = qr(self._data_features)
+        self._fitted_coefficients = solve_triangular(r, q.T.dot(self._output_samples), lower=False, check_finite=False)
+        return self._fitted_coefficients
 
 
-@ex.capture
-def _sketch_inverse_linear_regression(data_features: Matrix, output_samples: ColumnVector, clusters_count: int,
-                                      calc_residuals: bool = True, **kwargs) -> (ColumnVector, ColumnVector):
-    """
-    A solver for Linear-Regression, based on boosting the algorithm which solves the Normal-Equations,
-    using fast Caratheodory method.
+class _NormalEquationsSolver(BaseSolver):
+    @ex.capture
+    def __init__(self, data_features: Matrix, output_samples: ColumnVector, cross_validation_folds: int,
+                 n_alphas: int = -1):
+        r"""
+        A solver for Linear-Regression, based on solving the Normal-Equations.
 
-    Args:
-        data_features(Matrix): The input data matrix ``nxd``.
-        output_samples(ColumnVector): The output for the given inputs, ``nx1``.
-        calc_residuals(bool): A flag for calculating the regression residuals. Defaults to ``True``.
+        Args:
+            data_features(Matrix): The input data matrix :math:`n \times d`.
+            output_samples(ColumnVector): The output for the given inputs, :math:`n \times 1`.
+            n_alphas(int): The number of total regularization terms which will be tested by this solver.
+            cross_validation_folds(int): The number of cross-validation folds used in this solver.
 
-    Returns:
-        Two column vectors of the estimated coefficients and the estimator's residuals.
+        """
+        super(_NormalEquationsSolver, self).__init__(data_features, output_samples, n_alphas, cross_validation_folds)
+        self._model = None
 
-    Raises:
-        IOError if ``output_samples`` has any negative entries.
-
-    """
-    if not np.all(output_samples > 0):
-        raise IOError("The estimated values MUST all be non-negative!!")
-    coreset: Matrix = create_coreset_fast_caratheodory(data_features, clusters_count)
-    outputs_sum: Scalar = np.sum(output_samples)
-    points, weights = fast_caratheodory_set_python(data_features.T, output_samples / outputs_sum, clusters_count)
-    a_times_outputs: ColumnVector = outputs_sum * points.dot(weights)
-    coefficients: ColumnVector = inv(coreset.T.dot(coreset)).dot(a_times_outputs)
-    residuals: ColumnVector = output_samples - data_features.dot(coefficients) if calc_residuals else -1
-    return coefficients, residuals
+    def fit(self) -> ColumnVector:
+        """
+        The method which fits the requested model to the given data.
+        """
+        self._fitted_coefficients = pinv(self._data_features).dot(self._output_samples)
+        return self._fitted_coefficients
 
 
-_sketch_cholesky_linear_regression: Callable = cholesky_booster(_svd_based_linear_regression)
-_caratheodory_booster_linear_regression: Callable = caratheodory_booster(_svd_based_linear_regression,
-                                                                         perform_normalization=False)
+class _SketchPreconditioerSolver(BaseSolver):
+    @ex.capture
+    def __init__(self, data_features: Matrix, output_samples: ColumnVector, cross_validation_folds: int, _seed,
+                 n_alphas: int = -1):
+        r"""
+        A solver for Linear-Regression, based on solving the Normal-Equations.
+
+        Args:
+            data_features(Matrix): The input data matrix :math:`n \times d`.
+            output_samples(ColumnVector): The output for the given inputs, :math:`n \times 1`.
+            n_alphas(int): The number of total regularization terms which will be tested by this solver.
+            cross_validation_folds(int): The number of cross-validation folds used in this solver.
+
+        """
+        super(_SketchPreconditioerSolver, self).__init__(data_features, output_samples, n_alphas,
+                                                         cross_validation_folds)
+        self._model = None
+        self._seed = _seed
+
+    @ex.capture(prefix="sketch_preconditioned_config")
+    def fit(self, sampled_rows: float, switch_sign_probability: float, min_sampled_rows: float) -> ColumnVector:
+        """
+        The method which fits the requested model to the given data.
+        """
+        num_of_rows: int = max(int(sampled_rows * len(self._data_features)), int(min_sampled_rows))
+        _, R = qr(generate_sketch_preconditioner(self._data_features, num_of_rows, np.empty_like(self._data_features),
+                                                 self._seed, switch_sign_probability))
+        partial_solution: ColumnVector = lsqr(self._data_features.dot(inv(R)), self._output_samples,
+                                              atol=1e-15, btol=1e-15)[0]
+        self._fitted_coefficients = solve_triangular(R, partial_solution, lower=False, check_finite=False)
+        return self._fitted_coefficients
+
+
+class _SketchInverseSolver(BaseSolver):
+    @ex.capture
+    def __init__(self, data_features: Matrix, output_samples: ColumnVector, cross_validation_folds: int,
+                 n_alphas: int = -1):
+        r"""
+        A solver for Linear-Regression, based on boosting the algorithm which solves the Normal-Equations,
+        using fast Caratheodory method.
+
+        Args:
+            data_features(Matrix): The input data matrix :math:`n \times d`.
+            output_samples(ColumnVector): The output for the given inputs, :math:`n \times 1`.
+            n_alphas(int): The number of total regularization terms which will be tested by this solver.
+            cross_validation_folds(int): The number of cross-validation folds used in this solver.
+
+        """
+        super(_SketchInverseSolver, self).__init__(data_features, output_samples, -1, cross_validation_folds)
+        self._model = None
+
+    @ex.capture
+    def fit(self, clusters_count) -> ColumnVector:
+        """
+        The method which fits the requested model to the given data.
+        """
+        coreset: Matrix = create_coreset_fast_caratheodory(self._data_features, clusters_count)
+        adapted_data, adapted_output, outputs_sum = self._preprocess_data()
+        weights, chosen_indices = fast_caratheodory_set_python(adapted_data.T, adapted_output, clusters_count)
+        a_times_outputs: ColumnVector = outputs_sum * adapted_data[chosen_indices, :].T.dot(weights)
+        self._fitted_coefficients = inv(coreset.T.dot(coreset)).dot(a_times_outputs)
+        return self._fitted_coefficients
+
+    def _preprocess_data(self):
+        data_copy: Matrix = self._data_features.copy()
+        output_copy: ColumnVector = self._output_samples.copy()
+        negative_indices: ColumnVector = np.argwhere(self._output_samples < 0)
+        data_copy[negative_indices, :] *= -1
+        output_copy[negative_indices] *= -1
+        output_sum = np.sum(output_copy)
+        return data_copy, output_copy/output_sum, output_sum
+
+
+_sketch_cholesky_linear_regression: Callable = cholesky_booster(_SVDSolver)
+_caratheodory_booster_linear_regression: Callable = caratheodory_booster(_SVDSolver, perform_normalization=False)
 
 # A private dictionary used for creating the solvers factory :func:`get_method`.
 _linear_regressions_methods: Dict[str, Callable] = {
-    LinearRegressionMethods.SVDBased: _svd_based_linear_regression,
-    LinearRegressionMethods.QRBased: _qr_based_linear_regression,
-    LinearRegressionMethods.NormalEquationsBased: _normal_equations_based_linear_regression,
+    LinearRegressionMethods.SVDBased: _SVDSolver,
+    LinearRegressionMethods.QRBased: _QRSolver,
+    LinearRegressionMethods.NormalEquationsBased: _NormalEquationsSolver,
     LinearRegressionMethods.SketchAndCholesky: _sketch_cholesky_linear_regression,
     LinearRegressionMethods.BoostedSVDSolver: _caratheodory_booster_linear_regression,
-    LinearRegressionMethods.SketchAndInverse: _sketch_inverse_linear_regression,
-    LinearRegressionMethods.SketchPreconditioned: _sketch_preconditioned_based_linear_regression
+    LinearRegressionMethods.SketchAndInverse: _SketchInverseSolver,
+    LinearRegressionMethods.SketchPreconditioned: _SketchPreconditioerSolver
 }
 
 # A factory which creates the requested linear-regression solvers.

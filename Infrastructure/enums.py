@@ -84,7 +84,6 @@ class LassoRegressionMethods(BaseEnum):
 
     # The solver of Scikit-Learn, boosted by Caratheodory coreset booster.
     BoostedLassoRegression: str = "LassoCV with Fast Caratheodory booster"
-    SketchAndCholesky: str = "Sketch + Cholesky"  # The solver of Scikit-Learn, boosted by Cholesky decomposition.
 
 
 class RidgeRegressionMethods(BaseEnum):
@@ -95,7 +94,6 @@ class RidgeRegressionMethods(BaseEnum):
 
     # The solver of Scikit-Learn, boosted by Caratheodory coreset booster.
     BoostedRidgeRegression: str = "RidgeCV with Fast Caratheodory booster"
-    SketchAndCholesky: str = "Sketch + Cholesky"  # The solver of Scikit-Learn, boosted by Cholesky decomposition.
 
 
 class ElasticNetRegressionMethods(BaseEnum):
@@ -107,7 +105,6 @@ class ElasticNetRegressionMethods(BaseEnum):
 
     # The solver of Scikit-Learn, boosted by Caratheodory coreset booster.
     BoostedElasticNetRegression: str = "ElasticNetCV with Fast Caratheodory booster"
-    SketchAndCholesky: str = "Sketch + Cholesky"  # The solver of Scikit-Learn, boosted by Cholesky decomposition.
 
 
 class NumpyDistribution(BaseEnum):

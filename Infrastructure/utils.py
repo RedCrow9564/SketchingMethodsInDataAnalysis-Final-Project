@@ -180,7 +180,7 @@ def measure_time(method: Callable) -> Callable:
         result = method(*args, **kw)
         te = time.perf_counter_ns()
         duration_in_seconds: float = (te - ts) * 1e-9
-        return result + (duration_in_seconds,)
+        return result, duration_in_seconds
     timed.__name__ = method.__name__ + " with time measure"
     return timed
 

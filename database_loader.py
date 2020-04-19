@@ -51,8 +51,8 @@ def _get_3d_road_network_data(resources_path: str) -> (Matrix, ColumnVector):
 
     """
     data: Matrix = scale(np.loadtxt(os.path.join(resources_path, "3D_spatial_network.txt"), delimiter=','))
-    output_samples: ColumnVector = scale(data[:, -1])
-    data_matrix: Matrix = scale(data[:, 1:3])
+    output_samples: ColumnVector = data[:, -1]
+    data_matrix: Matrix = np.ascontiguousarray(data[:, 1:3])
     return data_matrix, output_samples
 
 
@@ -71,7 +71,8 @@ def _get_house_sales_in_king_county_data(resources_path: str) -> (Matrix, Column
     """
     df = pd.read_csv(os.path.join(resources_path, "kc_house_data.csv"))
     output_samples: ColumnVector = scale(df["price"].to_numpy())
-    data_matrix: Matrix = scale(df.drop(columns=["id", "price", "date"]).to_numpy())
+    data_matrix: Matrix = np.ascontiguousarray(scale(df[["bedrooms", "sqft_living", "sqft_lot", "floors", "waterfront",
+                                                         "sqft_above", "sqft_basement", "yr_built"]].to_numpy()))
     return data_matrix, output_samples
 
 
@@ -91,7 +92,7 @@ def _get_household_electric_power_consumption_data(resources_path: str) -> (Matr
     df = pd.read_csv(os.path.join(resources_path, "household_power_consumption.txt"), sep=';', na_values="?")
     df.dropna(axis=0, inplace=True)
     output_samples: ColumnVector = scale(pd.to_numeric(df["Voltage"]).to_numpy())
-    data_matrix: Matrix = scale(df[["Global_active_power", "Global_reactive_power"]].astype("float64").to_numpy())
+    data_matrix: Matrix = np.ascontiguousarray(scale(df[["Global_active_power", "Global_reactive_power"]].astype("float64").to_numpy()))
     return data_matrix, output_samples
 
 
