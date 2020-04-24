@@ -17,7 +17,7 @@ class LogFields(BaseEnum):
     """
     DataSize: str = "Data size"
     Coefficients: str = "Coefficients"
-    Residuals: str = "Residuals" #  2-norm of errors of estimation for the given data.
+    Residuals: str = "Residuals"  # 2-norm of errors of estimation for the given data.
     DurationInSeconds: str = "Duration in seconds"
     AtTimesErrors: str = "A transpose times Errors"
     AlphasCount: str = "Alphas count"
@@ -73,7 +73,7 @@ class LinearRegressionMethods(BaseEnum):
     NormalEquationsBased: str = "Based on Normal-Equations"  # Solver based on solving the Normal-Equations.
     SketchAndCholesky: str = "Sketch + Cholesky"
     SketchAndInverse: str = "Sketch + Inverse"
-    SketchPreconditioned: str = "Sketch Preconsitioning for LSQR"
+    SketchPreconditioned: str = "Sketch Preconditioning for LSQR"
 
 
 class LassoRegressionMethods(BaseEnum):

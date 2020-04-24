@@ -21,7 +21,7 @@ from Infrastructure.utils import ex, Dict, ColumnVector, Matrix, create_factory,
 
 
 @ex.capture(prefix="synthetic_data_config")
-def _get_synthetic_data(data_size: int, features_num: int) -> (Matrix, ColumnVector):
+def get_synthetic_data(data_size: int, features_num: int) -> (Matrix, ColumnVector):
     """
     A method which creates a random matrix of ``size data_size x features_num`` and a ``random 1 x data_size``
     random vector.
@@ -51,6 +51,7 @@ def _get_3d_road_network_data(resources_path: str) -> (Matrix, ColumnVector):
 
     """
     data: Matrix = scale(np.loadtxt(os.path.join(resources_path, "3D_spatial_network.txt"), delimiter=','))
+    #data = data.astype(np.float32)
     output_samples: ColumnVector = data[:, -1]
     data_matrix: Matrix = np.ascontiguousarray(data[:, 1:3])
     return data_matrix, output_samples
@@ -98,7 +99,7 @@ def _get_household_electric_power_consumption_data(resources_path: str) -> (Matr
 
 # A private dictionary used to create the method "get_data"
 _database_type_to_function: Dict[str, Callable] = {
-    DatabaseType.Synthetic: _get_synthetic_data,
+    DatabaseType.Synthetic: get_synthetic_data,
     DatabaseType.ThreeDRoadNetwork: _get_3d_road_network_data,
     DatabaseType.HouseSalesInKingCounty: _get_house_sales_in_king_county_data,
     DatabaseType.IndividualHouseholdElectricPowerConsumption: _get_household_electric_power_consumption_data

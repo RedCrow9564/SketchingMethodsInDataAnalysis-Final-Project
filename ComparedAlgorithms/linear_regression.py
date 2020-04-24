@@ -12,9 +12,9 @@ Example:
 
 """
 
-from numpy.linalg import lstsq, inv, pinv, qr
+from numpy.linalg import lstsq, inv, qr
 import numpy as np
-from scipy.linalg import solve_triangular
+from scipy.linalg import solve_triangular, solve
 from scipy.sparse.linalg import lsqr
 from Infrastructure.enums import LinearRegressionMethods
 from Infrastructure.utils import ex, create_factory, Dict, Scalar, ColumnVector, Matrix, Callable
@@ -96,11 +96,14 @@ class _NormalEquationsSolver(BaseSolver):
         """
         The method which fits the requested model to the given data.
         """
-        self._fitted_coefficients = pinv(self._data_features).dot(self._output_samples)
+        gram: Matrix = self._data_features.T.dot(self._data_features)
+        self._fitted_coefficients = self._data_features.T.dot(self._output_samples)
+        self._fitted_coefficients = solve(gram, self._fitted_coefficients, overwrite_a=True, overwrite_b=True,
+                                          check_finite=False, assume_a="sym")
         return self._fitted_coefficients
 
 
-class _SketchPreconditioerSolver(BaseSolver):
+class _SketchPreconditionerSolver(BaseSolver):
     @ex.capture
     def __init__(self, data_features: Matrix, output_samples: ColumnVector, cross_validation_folds: int, _seed,
                  n_alphas: int = -1):
@@ -114,8 +117,8 @@ class _SketchPreconditioerSolver(BaseSolver):
             cross_validation_folds(int): The number of cross-validation folds used in this solver.
 
         """
-        super(_SketchPreconditioerSolver, self).__init__(data_features, output_samples, n_alphas,
-                                                         cross_validation_folds)
+        super(_SketchPreconditionerSolver, self).__init__(data_features, output_samples, n_alphas,
+                                                          cross_validation_folds)
         self._model = None
         self._seed = _seed
 
@@ -152,7 +155,7 @@ class _SketchInverseSolver(BaseSolver):
         self._model = None
 
     @ex.capture
-    def fit(self, clusters_count) -> ColumnVector:
+    def fit(self, clusters_count, is_positive_definite: bool = False) -> ColumnVector:
         """
         The method which fits the requested model to the given data.
         """
@@ -160,7 +163,8 @@ class _SketchInverseSolver(BaseSolver):
         adapted_data, adapted_output, outputs_sum = self._preprocess_data()
         weights, chosen_indices = fast_caratheodory_set_python(adapted_data.T, adapted_output, clusters_count)
         a_times_outputs: ColumnVector = outputs_sum * adapted_data[chosen_indices, :].T.dot(weights)
-        self._fitted_coefficients = inv(coreset.T.dot(coreset)).dot(a_times_outputs)
+        self._fitted_coefficients = solve(coreset.T.dot(coreset), a_times_outputs, overwrite_a=True, overwrite_b=True,
+                                          check_finite=False, assume_a="pos" if is_positive_definite else "sym")
         return self._fitted_coefficients
 
     def _preprocess_data(self):
@@ -184,7 +188,7 @@ _linear_regressions_methods: Dict[str, Callable] = {
     LinearRegressionMethods.SketchAndCholesky: _sketch_cholesky_linear_regression,
     LinearRegressionMethods.BoostedSVDSolver: _caratheodory_booster_linear_regression,
     LinearRegressionMethods.SketchAndInverse: _SketchInverseSolver,
-    LinearRegressionMethods.SketchPreconditioned: _SketchPreconditioerSolver
+    LinearRegressionMethods.SketchPreconditioned: _SketchPreconditionerSolver
 }
 
 # A factory which creates the requested linear-regression solvers.

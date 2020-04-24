@@ -42,15 +42,17 @@ def config():
     """
 
     compared_algorithms_type: AlgorithmsType = AlgorithmsType.LinearRegression
-    compared_methods: List = [LinearRegressionMethods.BoostedSVDSolver]  # Leave empty for using all solvers.
+    compared_methods: List = []  # Leave empty for using all solvers.
     numpy_distribution: NumpyDistribution = NumpyDistribution.IntelDistribution
-    used_database: DatabaseType = DatabaseType.HouseSalesInKingCounty
+    used_database: DatabaseType = DatabaseType.Synthetic
     experiment_type: ExperimentType = ExperimentType.RunTimeExperiment
     cross_validation_folds: int = 1
     n_alphas: int = 100
+    reduction_factor: int = 1
 
     run_time_experiments_config: Dict[str, range] = {
-        "run_time_compared_data_sizes": range(1000, 21600, 1000),
+        "run_time_compared_data_sizes": range(int(5000 / reduction_factor), int(15000 / reduction_factor),
+                                              int(5000 / reduction_factor)),
         "calc_transpose_dot_residuals": compared_algorithms_type == AlgorithmsType.LinearRegression
     }
     number_of_alphas_experiments_config: Dict[str, range] = {
@@ -58,9 +60,10 @@ def config():
     }
 
     synthetic_data_config: Dict[str, int] = {
-        "data_size": 2700000,
+        "data_size": int(15000 / reduction_factor),
         "features_num": 7
     }
+
     sketch_preconditioned_config: Dict[str, float] = {
         "sampled_rows": 0.005,
         "switch_sign_probability": 0.5,
@@ -70,6 +73,7 @@ def config():
     results_path: str = r'Results'
     clusters_count: int = _choose_clusters_num(used_database, synthetic_data_config["features_num"])
     elastic_net_factor: float = 0.5  # Rho factor in Elastic-Net regularization.
+    is_positive_definite: bool = True
 
 
 @ex.automain
