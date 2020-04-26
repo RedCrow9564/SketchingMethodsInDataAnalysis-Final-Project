@@ -1,5 +1,5 @@
 # Sketching Methods for Analysis of Matrices and Data (0372-4004) - Final Project
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/RedCrow9564/SpectralMethodsProject-RandomSVD/blob/master/Spectral_Methods_Project_Random_SVD.ipynb) 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/RedCrow9564/SketchingMethodsInDataAnalysis-Final-Project/blob/master/Sketching_Methods_Final_Project.ipynb) 
 [![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/tterb/atomic-design-ui/blob/master/LICENSEs)
 ![Run Unit-Tests](https://github.com/RedCrow9564/SketchingMethodsInDataAnalysis-Final-Project/workflows/Run%20Unit-Tests/badge.svg?branch=master)
 ![Compute Code Metrics](https://github.com/RedCrow9564/SketchingMethodsInDataAnalysis-Final-Project/workflows/Compute%20Code%20Metrics/badge.svg?branch=master)
@@ -11,7 +11,7 @@ solutions accurately. A complete documentation of the code is available [here][*
 
 ## Getting Started
 
-The code can be fetched from [this repo](https://github.com/RedCrow9564/SketchingMethodsInDataAnalysis-Final-Project). The [Jupyter Notebook](Spectral_Methods_Project_Random_SVD.ipynb) does the same work, and can be deployed to Google Colab [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/RedCrow9564/SpectralMethodsProject-RandomSVD/blob/master/Spectral_Methods_Project_Random_SVD.ipynb). While the the notebook version can be used immediately, this code has some prerequisites.
+The code can be fetched from [this repo](https://github.com/RedCrow9564/SketchingMethodsInDataAnalysis-Final-Project). The [Jupyter Notebook](Spectral_Methods_Project_Random_SVD.ipynb) does the same work, and can be deployed to Google Colab [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/RedCrow9564/SketchingMethodsInDataAnalysis-Final-Project/blob/master/Sketching_Methods_Final_Project.ipynb). While the the notebook version can be used immediately, this code has some prerequisites.
 Any questions about this project may be sent by mail to 'eladeatah' at mail.tau.ac.il (replace 'at' by @).
 
 ### Prerequisites
