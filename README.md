@@ -4,7 +4,6 @@
 ![Run Unit-Tests](https://github.com/RedCrow9564/SketchingMethodsInDataAnalysis-Final-Project/workflows/Run%20Unit-Tests/badge.svg?branch=master)
 ![Compute Code Metrics](https://github.com/RedCrow9564/SketchingMethodsInDataAnalysis-Final-Project/workflows/Compute%20Code%20Metrics/badge.svg?branch=master)
 ![GitHub last commit](https://img.shields.io/github/last-commit/RedCrow9564/SketchingMethodsInDataAnalysis-Final-Project)
-TODO: Update the last commit badge after making this repo public.
 
 This is a project submitted as a requirement for this course. [The course](https://www30.tau.ac.il/yedion/syllabus.asp?course=0372400401) was administered in Fall 2019-2020 (before the Coronavirus outbreak...) in [Tel-Aviv University - School of Mathematical Sciences](https://en-exact-sciences.tau.ac.il/math), and taught by [Prof. Haim Avron](https://english.tau.ac.il/profile/haimav). 
 This project is a reconstruction of experiments of [[1]](#1) about an algorithm for faster computation least-square 
