@@ -1,96 +1,14 @@
 # -*- coding: utf-8 -*-
-""" All enums section
+"""
+enums.py - All enums section
+============================
 
 This module contains all possible enums of this project. Most of them are used by the configuration section in
-:mod:`main`. See the following example on using an enum.
-
-Example
--------
-    a = DatabaseType.Synthetic
+:mod:`main`. An example for using enum: ``ExperimentType.RunTimeExperiment``
 
 """
 
-from typing import Iterator, List
-import inspect
-
-
-class _MetaEnum(type):
-    """
-    A private meta-class which given any BaseEnum object to be an iterable.
-    This can be used for iterating all possible values of this enum. Should not be used explicitly.
-    """
-    def __iter__(self) -> Iterator:
-        """
-        This method gives any BaseEnum the ability of iterating over all the enum's values.
-
-        Returns:
-        --------
-            An iterator for the collection of all the enum's values.
-
-        """
-        # noinspection PyUnresolvedReferences
-        return self.enum_iter()
-
-    def __contains__(self, item) -> bool:
-        """
-        This method give any BaseEnum the ability to test if a given item is a possible value for this enum class.
-
-        Returns:
-        --------
-            A flag which indicates if 'item' is a possible value for this enum class.
-
-        """
-        # noinspection PyUnresolvedReferences
-        return self.enum_contains(item)
-
-
-class BaseEnum(metaclass=_MetaEnum):
-    """
-    A basic interface for all enum classes. Should be sub-classed in eny enum.
-
-    Example:
-    -------
-        class AlgorithmsType(BaseEnum)
-
-    """
-
-    @classmethod
-    def enum_iter(cls) -> Iterator:
-        """
-        This method gives any BaseEnum the ability of iterating over all the enum's values.
-
-        Returns:
-        --------
-            An iterator for the collection of all the enum's values.
-
-        """
-        return iter(cls.get_all_values())
-
-    @classmethod
-    def enum_contains(cls, item) -> bool:
-        """
-        This method give any BaseEnum the ability to test if a given item is a possible value for this enum class.
-
-        Returns:
-        --------
-                A flag which indicates if 'item' is a possible value for this enum class.
-
-        """
-        return item in cls.get_all_values()
-
-    @classmethod
-    def get_all_values(cls) -> List:
-        """
-        A method which fetches all possible values of an enum. Used for iterating over an enum.
-
-        Returns:
-        --------
-            A list of all possible enum's values.
-
-        """
-        all_attributes: List = inspect.getmembers(cls, lambda a: not inspect.ismethod(a))
-        all_attributes = [value for name, value in all_attributes if not (name.startswith('__') or name.endswith('__'))]
-        return all_attributes
+from Infrastructure.utils import BaseEnum
 
 
 class LogFields(BaseEnum):
@@ -99,7 +17,7 @@ class LogFields(BaseEnum):
     """
     DataSize: str = "Data size"
     Coefficients: str = "Coefficients"
-    Residuals: str = "Residuals" #  2-norm of errors of estimation for the given data.
+    Residuals: str = "Residuals"  # 2-norm of errors of estimation for the given data.
     DurationInSeconds: str = "Duration in seconds"
     AtTimesErrors: str = "A transpose times Errors"
     AlphasCount: str = "Alphas count"
@@ -155,10 +73,7 @@ class LinearRegressionMethods(BaseEnum):
     NormalEquationsBased: str = "Based on Normal-Equations"  # Solver based on solving the Normal-Equations.
     SketchAndCholesky: str = "Sketch + Cholesky"
     SketchAndInverse: str = "Sketch + Inverse"
-    #LGMRES: str = "LGMRES"  # Scipy's function supports preconditioning.
-    #QMR: str = "QMR"  # Scipy's function supports preconditioning.
-    #LSQR: str = "LSQR"  # Scipy's function DOESN'T support preconditioning!!!
-    #LSMR: str = "LSMR"  # Scipy's function DOESN'T support preconditioning!!!
+    SketchPreconditioned: str = "Sketch Preconditioning for LSQR"
 
 
 class LassoRegressionMethods(BaseEnum):
@@ -169,7 +84,6 @@ class LassoRegressionMethods(BaseEnum):
 
     # The solver of Scikit-Learn, boosted by Caratheodory coreset booster.
     BoostedLassoRegression: str = "LassoCV with Fast Caratheodory booster"
-    SketchAndCholesky: str = "Sketch + Cholesky"  # The solver of Scikit-Learn, boosted by Cholesky decomposition.
 
 
 class RidgeRegressionMethods(BaseEnum):
@@ -180,7 +94,6 @@ class RidgeRegressionMethods(BaseEnum):
 
     # The solver of Scikit-Learn, boosted by Caratheodory coreset booster.
     BoostedRidgeRegression: str = "RidgeCV with Fast Caratheodory booster"
-    SketchAndCholesky: str = "Sketch + Cholesky"  # The solver of Scikit-Learn, boosted by Cholesky decomposition.
 
 
 class ElasticNetRegressionMethods(BaseEnum):
@@ -192,7 +105,6 @@ class ElasticNetRegressionMethods(BaseEnum):
 
     # The solver of Scikit-Learn, boosted by Caratheodory coreset booster.
     BoostedElasticNetRegression: str = "ElasticNetCV with Fast Caratheodory booster"
-    SketchAndCholesky: str = "Sketch + Cholesky"  # The solver of Scikit-Learn, boosted by Cholesky decomposition.
 
 
 class NumpyDistribution(BaseEnum):

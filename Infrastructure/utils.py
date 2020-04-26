@@ -1,21 +1,24 @@
 # -*- coding: utf-8 -*-
-""" The common utilities functions and objects for this project.
+"""
+utils.py - The common utilities functions and objects
+=====================================================
 
 This module contains all frequently-used methods and objects which can be shared among the entire project.
-For example, data types name used for type-hinting, a basic enum class BaseEnum, methods for measuering
-run-time of a given function or distributing its computation in parallel
+For example, data types name used for type-hinting, a basic enum class :class:`BaseEnum`, methods for measuring
+run-time of a given function.
 """
-from copy import deepcopy
-from typing import List, Dict, Callable, Tuple, ClassVar, Iterable, Mapping, Union, Iterator
+from typing import List, Dict, Callable, ClassVar, Union, Iterator
 from nptyping import Array
 import inspect
 import time
 import pandas as pd
 import os
+import numpy as np
 from multiprocessing import Pool
-from types import ModuleType
 from sacred import Experiment
+import pyximport
 
+pyximport.install(setup_args={"include_dirs": np.get_include()}, reload_support=True)
 # Defining the "sacred" experiment object.
 ex = Experiment(name="Initializing project", interactive=False)
 
@@ -32,7 +35,7 @@ StaticField = ClassVar
 
 class _MetaEnum(type):
     """
-    A private meta-class which given any BaseEnum object to be an iterable.
+    A private meta-class which given any :class:`BaseEnum` object to be an iterable.
     This can be used for iterating all possible values of this enum. Should not be used explicitly.
     """
     def __iter__(self) -> Iterator:
@@ -40,7 +43,6 @@ class _MetaEnum(type):
         This method gives any BaseEnum the ability of iterating over all the enum's values.
 
         Returns:
-        --------
             An iterator for the collection of all the enum's values.
 
         """
@@ -52,7 +54,6 @@ class _MetaEnum(type):
         This method give any BaseEnum the ability to test if a given item is a possible value for this enum class.
 
         Returns:
-        --------
             A flag which indicates if 'item' is a possible value for this enum class.
 
         """
@@ -62,12 +63,7 @@ class _MetaEnum(type):
 
 class BaseEnum(metaclass=_MetaEnum):
     """
-    A basic interface for all enum classes. Should be sub-classed in eny enum.
-
-    Example:
-    -------
-        class AlgorithmsType(BaseEnum)
-
+    A basic interface for all enum classes. Should be sub-classed in eny enum, i.e ``class ExperimentType(BaseEnum)``
     """
 
     @classmethod
@@ -76,7 +72,6 @@ class BaseEnum(metaclass=_MetaEnum):
         This method gives any BaseEnum the ability of iterating over all the enum's values.
 
         Returns:
-        --------
             An iterator for the collection of all the enum's values.
 
         """
@@ -88,8 +83,7 @@ class BaseEnum(metaclass=_MetaEnum):
         This method give any BaseEnum the ability to test if a given item is a possible value for this enum class.
 
         Returns:
-        --------
-                A flag which indicates if 'item' is a possible value for this enum class.
+            A flag which indicates if 'item' is a possible value for this enum class.
 
         """
         return item in cls.get_all_values()
@@ -100,7 +94,6 @@ class BaseEnum(metaclass=_MetaEnum):
         A method which fetches all possible values of an enum. Used for iterating over an enum.
 
         Returns:
-        --------
             A list of all possible enum's values.
 
         """
@@ -109,35 +102,16 @@ class BaseEnum(metaclass=_MetaEnum):
         return all_attributes
 
 
-def get_user_defined_classes(file_scope) -> List:
-    """
-    A method which fetches all un-imported classes in a given module.
-
-    Attributes:
-    ---------
-        file_scope: A Python module.
-
-    Returns:
-    --------
-        A list of all un-imported classes in this module.
-
-    """
-    user_classes: List = [x for x in dir(file_scope) if not x.startswith('__') or not x.endswith('__')]
-    return user_classes
-
-
 def create_factory(possibilities_dict: Dict[str, Callable], are_methods: bool = False) -> Callable:
     """
     A generic method for creating factories for the entire project.
 
-    Attributes:
-    ----------
+    Args:
         possibilities_dict(Dict[str, Callable]): The dictionary which maps object types (as strings!) and returns the
             relevant class constructors.
         are_methods(bool): A flag, true if the factory output are methods, rather than objects. Defaults to False
 
     Returns:
-    -------
          The factory function for the given classes/methods mapping.
 
     """
@@ -157,13 +131,11 @@ def compute_parallel(func: Callable, arguments) -> List:
     """
     A method which computes a given method for given arguments in parallel and returns its result in a list.
 
-    Attributes:
-    -----------
+    Args:
         func(Callable): A function whose computation will be performed in parallel.
         arguments:  A collection for given inputs to the input method 'func'.
 
     Returns:
-    --------
         A list for all outputs of this method for all given input arguments.
 
     """
@@ -177,13 +149,11 @@ def compute_serial(func: Callable, arguments) -> List:
     """
         A method which computes a given method for given arguments in parallel and returns its result in a list.
 
-        Attributes:
-        -----------
+        Args:
             func(Callable): A function whose computation will be performed in parallel.
             arguments:  A collection for given inputs to the input method 'func'.
 
         Returns:
-        --------
             A list for all outputs of this method for all given input arguments.
 
         """
@@ -198,12 +168,10 @@ def measure_time(method: Callable) -> Callable:
     A method which receives a method and returns the same method, while including run-time measure
     output for the given method, in seconds.
 
-    Attributes:
-    -----------
+    Args:
         method(Callable): A method whose run-time we are interested in measuring.
 
     Returns:
-    -------
         A function which does exactly the same, with an additional run-time output value in seconds.
 
     """
@@ -211,8 +179,8 @@ def measure_time(method: Callable) -> Callable:
         ts = time.perf_counter_ns()
         result = method(*args, **kw)
         te = time.perf_counter_ns()
-        duration_in_ms: float = (te - ts) * 1e-9
-        return result + (duration_in_ms,)
+        duration_in_seconds: float = (te - ts) * 1e-9
+        return result, duration_in_seconds
     timed.__name__ = method.__name__ + " with time measure"
     return timed
 
@@ -222,21 +190,47 @@ def is_empty(collection: List) -> bool:
 
 
 class DataLog:
+    """
+    A class for log-management objects. See the following example for creating it: ``DataLog(["Column 1", "Column 2"])``
+    """
     def __init__(self, log_fields: List):
-        # TODO: Consider implementing the data-log using pandas.
+        """
+        This methods initializes an empty log.
+
+        Args:
+            log_fields(List) - A list of column names for this log.
+
+        """
         self._data: Dict = dict()
         self._log_fields: List = log_fields
         for log_field in log_fields:
-            self._data[log_field] = []
+            self._data[log_field] = list()
 
     def append(self, data_type: str, value: Vector) -> None:
+        """
+        This methods appends given data to the given column inside the log.
+        Example of usage:``log.append(DataFields.DataSize, 20)``
+
+        Args:
+            data_type(LogFields): The column name in which the input data in inserted to.
+            value(Scalar): The value to insert to the log.
+
+        """
         self._data[data_type] += value
 
     def append_dict(self, data_dict: Dict) -> None:
         for log_field, data_value in data_dict.items():
             self.append(log_field, data_value)
 
-    def save_log(self, log_file_name):
+    def save_log(self, log_file_name: str, results_folder_path: str) -> None:
+        """
+        This method saves the log to a file, with the input name, in the input folder path.
+
+        Args:
+            log_file_name(str): The name for this log file.
+            results_folder_path(str): The path in which this log will be saved.
+
+        """
         df = pd.DataFrame(self._data, columns=self._log_fields)
-        df.to_csv(os.path.join(r'Results/', log_file_name), sep=",")
+        df.to_csv(os.path.join(results_folder_path, log_file_name + ".csv"), sep=",", float_format="%.2E", index=False)
         ex.info["Experiment Log"] = self._data

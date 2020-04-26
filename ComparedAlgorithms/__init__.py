@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-""" A solvers' factory method
+"""
+__init__.py - A solvers' factory method
+========================================
 
-This module contains the factory method "get_method" which creates the requested solvers for an experiment.
+This module contains the factory method :func:`get_method` which creates the requested solvers for an experiment.
 See the following examples on creating solvers.
 
-Example
--------
+Examples:
     get_methods(AlgorithmsType.LinearRegression, []) - Creates all available solvers for Linear-Regression.
     get_methods(AlgorithmsType.LinearRegression, [LinearRegressionMethods.SVDBased]) - Creates only the standard Numpy
      solver for Linear-Regression.
@@ -31,18 +32,16 @@ def get_methods(requested_algorithms_type: AlgorithmsType, compared_methods: Lis
     """
     A factory which creates the requested solvers.
 
-    Attributes:
-    -----------
+    Args:
         requested_algorithms_type(AlgorithmsType): The name of the solvers type, i.e linear-regression
         compared_methods(List): A list of specific solvers to create. If empty, all solvers of a given type are created.
 
     Returns:
-    --------
          A list of all relevant solvers.
 
     """
     solvers_names_list, solvers_factory = _algorithms_type_to_algorithms[requested_algorithms_type]
-    solvers: List = []
+    solvers: List = list()
     if is_empty(compared_methods):
         for solver_name in solvers_names_list:
             solvers.append(solvers_factory.get_method(solver_name))

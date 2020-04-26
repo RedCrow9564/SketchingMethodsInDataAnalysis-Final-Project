@@ -1,8 +1,10 @@
 # Sketching Methods for Analysis of Matrices and Data (0372-4004) - Final Project
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/RedCrow9564/SpectralMethodsProject-RandomSVD/blob/master/Spectral_Methods_Project_Random_SVD.ipynb) 
 [![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/tterb/atomic-design-ui/blob/master/LICENSEs)
-![Run Unit-Tests](https://github.com/RedCrow9564/SpectralMethodsProject-RandomSVD/workflows/Run%20Unit-Tests/badge.svg)
-![Compute Code Metrics](https://github.com/RedCrow9564/SpectralMethodsProject-RandomSVD/workflows/Compute%20Code%20Metrics/badge.svg)![GitHub last commit](https://img.shields.io/github/last-commit/RedCrow9564/SpectralMethodsProject-RandomSVD)
+![Run Unit-Tests](https://github.com/RedCrow9564/SketchingMethodsInDataAnalysis-Final-Project/workflows/Run%20Unit-Tests/badge.svg?branch=master)
+![Compute Code Metrics](https://github.com/RedCrow9564/SketchingMethodsInDataAnalysis-Final-Project/workflows/Compute%20Code%20Metrics/badge.svg?branch=master)
+![GitHub last commit](https://img.shields.io/github/last-commit/RedCrow9564/SketchingMethodsInDataAnalysis-Final-Project)
+TODO: Update the last commit badge after making this repo public.
 
 This is a project submitted as a requirement for this course. [The course](https://www30.tau.ac.il/yedion/syllabus.asp?course=0372400401) was administered in Fall 2019-2020 (before the Coronavirus outbreak...) in [Tel-Aviv University - School of Mathematical Sciences](https://en-exact-sciences.tau.ac.il/math), and taught by [Prof. Haim Avron](https://english.tau.ac.il/profile/haimav). 
 This project is a reconstruction of experiments of [[1]](#1) about an algorithm for faster computation least-square 
