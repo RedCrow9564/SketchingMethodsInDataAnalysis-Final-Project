@@ -6,12 +6,13 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/RedCrow9564/SketchingMethodsInDataAnalysis-Final-Project)
 
 This is a project submitted as a requirement for this course. [The course](https://www30.tau.ac.il/yedion/syllabus.asp?course=0372400401) was administered in Fall 2019-2020 (before the Coronavirus outbreak...) in [Tel-Aviv University - School of Mathematical Sciences](https://en-exact-sciences.tau.ac.il/math), and taught by [Prof. Haim Avron](https://english.tau.ac.il/profile/haimav). 
-This project is a reconstruction of experiments of [[1]](#1) about an algorithm for faster computation least-square 
-solutions accurately. A complete documentation of the code is available [here][**ADD link_to_doc_homepage**].
+This project is a reconstruction of experiments of [[1]](#1) about an algorithm for a faster computation least-square 
+solutions accurately. A complete documentation of the code is available [here](doc/doc-html/documentation_homepage.html)(open it in a web browser).
 
 ## Getting Started
-
-The code can be fetched from [this repo](https://github.com/RedCrow9564/SketchingMethodsInDataAnalysis-Final-Project). The [Jupyter Notebook](Spectral_Methods_Project_Random_SVD.ipynb) does the same work, and can be deployed to Google Colab [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/RedCrow9564/SketchingMethodsInDataAnalysis-Final-Project/blob/master/Sketching_Methods_Final_Project.ipynb). While the the notebook version can be used immediately, this code has some prerequisites.
+The code can be fetched from [this repo](https://github.com/RedCrow9564/SketchingMethodsInDataAnalysis-Final-Project). 
+The Jupyter Notebook does the same work, and can be deployed to [Google Colab](https://colab.research.google.com/github/RedCrow9564/SketchingMethodsInDataAnalysis-Final-Project/blob/master/Sketching_Methods_Final_Project.ipynb). 
+While the the notebook version can be used immediately, this code has some prerequisites.
 Any questions about this project may be sent by mail to 'eladeatah' at mail.tau.ac.il (replace 'at' by @).
 
 ### Prerequisites
@@ -41,9 +42,8 @@ Ibrahim Jubran and Dr. Dan Feldman. The [following repo](https://github.com/ibra
 contains the original code of these researchers which produced the original results.
 
 ## License
-
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
 ## References
-<a id="1">[1]</a> [Fast and Accurate Least-Mean-Squares Solvers
+<a id="1">[1]</a> [Fast and Accurate Least-Mean-Squares Solvers. 
 Maalouf, Jubran and Feldman (NIPS 2019)](https://papers.nips.cc/paper/9040-fast-and-accurate-least-mean-squares-solvers.pdf).
